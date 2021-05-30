@@ -1,0 +1,27 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <link href="{{ url_for('static', filename='css/style.css') }}" rel='stylesheet' type='text/css' />
+    </head>
+    <body>
+        <form action="/subscribeToPE"  method="POST" id="reviewForm">
+            Enter Platform Event API Name
+            <label for="peName">Platform Event Object API Name: </label><br>
+            <input type="text" id="peName" name="peName" value="My_Platform_Event__e"><br>
+            <br/>
+            <br/>
+            <input type="submit" value="Submit">
+        </form>
+        {% if PEObjName is not none %}  
+            PE Object Name {{PEObjName}}
+        {% else %}
+            Blank
+        {% endif %} 
+<br/><br/>
+        {% if peData is not none %}  
+            Data Received {{peData}}
+        {% else %}
+            No data
+        {% endif %}
+    </body>
+</html>

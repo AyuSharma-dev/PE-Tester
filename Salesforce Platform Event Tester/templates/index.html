@@ -1,0 +1,10 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <link href="{{ url_for('static', filename='css/style.css') }}" rel='stylesheet' type='text/css' />
+    </head>
+    <body>
+        <a href="{{actionUrl}}" class="btn btn-primary">Authorize Your Org</a>
+        {{token}}
+    </body>
+</html>
