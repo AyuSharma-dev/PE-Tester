@@ -1,21 +1,22 @@
 import asyncio
 from aiosfstream import SalesforceStreamingClient, RefreshTokenAuthenticator, Client
+from flask_socketio import SocketIO, emit
 from flask import Flask, render_template, request, redirect, url_for
 import os, sys; sys.path.append(os.path.dirname(os.path.realpath(__file__)))    #Generate toekn
 from json import loads
 import requests
 
 CLIENT_SECRET = 'A53A18827957DE6C5828DB2A030E33592C560615EF70CD3568B1B8434A5C5876'
-CLIENT_ID = '3MVG9d8..z.hDcPIXQrmkWobDdePFvV91zBoNNn6.u9PPoB_5eT9c8ZEbjrK2eSG6tC6dRpG7Efaqvut18CIO&'
-REDIRECT_URL = 'https://08fac19184ce.ngrok.io/oauth2/callback'
+CLIENT_ID = '3MVG9d8..z.hDcPIXQrmkWobDdePFvV91zBoNNn6.u9PPoB_5eT9c8ZEbjrK2eSG6tC6dRpG7Efaqvut18CIO'
+REDIRECT_URL = 'https://0a44042e19dd.ngrok.io/oauth2/callback'
 RESPONSE_TYPE = 'code'
 EVENT_NAME = ''
-REFRESH_TOKEN = '5Aep861ZBQbtA4s3JXD7tl8yhENZJpxy.kI.LmUTVDUSSeACmwIUW8OqAIAcSrOFvkqqAn9PcvWf1eV5AQDOu5K'
 
 v_eventName = ""
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24) #Generating the secret key
+socketio = SocketIO(app, engineio_logger=True, logger=True, cors_allowed_origins='https://0a44042e19dd.ngrok.io', async_mode="threading")
 
 @app.route('/', methods=['POST', 'GET'])
 def home():
@@ -31,8 +32,9 @@ def home():
 def oauthCallback():
     print('code-->'+request.args.get('code'))
     authDetails = getAccessToke( request.args.get('code') )
-    if( authDetails != None or authDetails['REFRESH_TOKEN'] != None ):
-        REFRESH_TOKEN = authDetails['REFRESH_TOKEN']
+    if( authDetails != None or authDetails['refresh_token'] != None ):
+        global REFRESH_TOKEN
+        REFRESH_TOKEN = authDetails['refresh_token']
     else:
         return render_template( 'error.html' )
     
@@ -53,28 +55,36 @@ def getPEDetails():
 
     return render_template("EventSubscription.html", PEObjName=PEObjName, peData=None)
 
-async def stream_events():
 
-    # capture oauth inputs from user
-    print()
-    print("Welcome to the Platform Event listener from Salesforce4Ever.com!")
-    print("****************************************************************")
-    print()
-    print("Connexion to your org will be established using OAUTH2 Username/Password...")
-    # init variable here to unsubscribe properly the event in case of exception
- 
-    v_ptfevt = "/event/"+EVENT_NAME
+def messageReceived(methods=['GET', 'POST']):
+    print('Hey Yaaa')
 
-    # connect to the org
+
+# @socketio.on('my event')
+# def handle_my_custom_event(json, methods=['GET', 'POST']):
+#     print('received my event: ' + str(json))
+#     socketio.emit('my response', json, callback=messageReceived)
+
+
+@socketio.on('my event')
+def stream_events(json, methods=['GET', 'POST']):
     print('RefreshToke-->'+REFRESH_TOKEN)
     print('clientsec-->'+CLIENT_SECRET)
     print('clientsec-->'+CLIENT_ID)
 
+    loop = asyncio.new_event_loop()
+    loop.run_until_complete(perform_message())
+
+
+async def perform_message():
+    ##message = ws.receive()
+    v_ptfevt = "/event/"+'Notification__e'
+
     auth = RefreshTokenAuthenticator(
-                consumer_key=CLIENT_ID,
-                consumer_secret=CLIENT_SECRET,
-                refresh_token='5Aep861ZBQbtA4s3JXD7tl8yhENZJpxy.kI.LmUTVDUSSeACmwIUW8OqAIAcSrOFvkqqAn9PcvWf1eV5AQDOu5K'
-            )
+            consumer_key=CLIENT_ID,
+            consumer_secret=CLIENT_SECRET,
+            refresh_token=REFRESH_TOKEN
+        )
     client = Client(auth)
 
     await client.open()
@@ -85,20 +95,19 @@ async def stream_events():
 
     print("Subscribed successfully to the event!")
     print("Listening for incoming messages...")
+    socketio.emit('my response', {'data':{'message':'Listening To PE Events0'}}, callback=messageReceived)
     # listen for incoming messages
     async for message in client:
         topic = message["channel"]
         data = message["data"]
         payload = message["data"]["payload"]
         print(f"Payload is: {payload}")
-        render_template( 'EventSubscription', PEObjName=EVENT_NAME, peData=payload )
+        socketio.emit('my response', {'data':payload}, callback=messageReceived)
 
 
 def subscribePlatformEvent():
     try:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(stream_events())
+        print('AAA')
     except KeyboardInterrupt:
         print()
         print()
@@ -123,7 +132,7 @@ def getAccessToke( code ):
 
 ##Running the app
 if __name__ == '__main__':
-    app.run(debug=True)
+    socketio.run(app)
             
 # if __name__ == "__main__":
 #     try:
