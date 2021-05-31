@@ -1,58 +1,58 @@
 <!DOCTYPE HTML>
 <html style="max-height: 100%;">
-    <head>
-        <link href="{{ url_for('static', filename='css/style.css') }}" rel='stylesheet' type='text/css' />
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
-    </head>
-    <body>
-        {% with org_name=none %}
-            {% include 'navbar.html' %}
-        {% endwith %}
-        <div class="bg" >
-            <br/>
-            <br/>
-            <form action="" method="POST" style="margin-top: 8em;">
-                <select class="org_types" name="OrgType">
-                    <option value="production">Production</option>
-                    <option value="sandbox">Sandbox</option>
-                </select><br/>
-                <input type="submit"/>
-            </form>
-            <a href="{{actionUrlProd}}" id="linkProd" style='Display:None'></a>
-            <a href="{{actionUrlSand}}" id="linkSand" style='Display:None'></a>
-        </div>
-        <div>
-            <h1 class="bottomTitle">Salesforce Platform Event Tester</h1>
-        </div>
-        <script>
-            var form = $( 'form' ).on( 'submit', function( e ) {
-                e.preventDefault();
-                let orgType = $( 'select.org_types' ).val();
-                if( orgType === 'sandbox' ){
-                    document.getElementById('linkSand').click();
+
+<head>
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel='stylesheet' type='text/css' />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+    <!---->
+</head>
+
+<body>
+    {% with org_name=none %}
+    {% include 'navbar.html' %}
+    {% endwith %}
+    
+    <div class="bg">
+        <br />
+        <br />
+        <form action="" method="POST" style="margin-top: 8em;">
+            <select class="org_types" name="OrgType">
+                <option value="production">Production</option>
+                <option value="sandbox">Sandbox</option>
+            </select><br />
+            <input type="submit" />
+        </form>
+        <a href="{{actionUrlProd}}" id="linkProd" style='Display:None'></a>
+        <a href="{{actionUrlSand}}" id="linkSand" style='Display:None'></a>
+    </div>
+    <div>
+        <h1 class="bottomTitle">Salesforce Platform Event Tester</h1>
+    </div>
+    {{token}}
+    <script type="text/javascript" src="{{ url_for('static', filename='js/index.js') }}"></script>
+    <!--<script>
+        var form = $('form').on('submit', function (e) {
+            e.preventDefault();
+            console.log('submitted');
+            let orgType = $('select.org_types').val();
+            if (orgType === 'sandbox') {
+                document.getElementById('linkSand').click();
+            } else {
+                document.getElementById('linkProd').click();
+            }
+            var form = $(this);
+            var url = '/getOrgType';
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: form.serialize(), // serializes the form's elements.
+                success: function (data) {
+                    console.log('success'); // show response from the php script.
                 }
-                else{
-                    document.getElementById('linkProd').click();
-                }
-                var form = $(this);
-                var url = '/getOrgType';
-                $.ajax({
-                    type: "POST",
-                    url: url,
-                    data: form.serialize(), // serializes the form's elements.
-                    success: function(data)
-                    {
-                        console.log('success'); // show response from the php script.
-                    }
-                });
             });
-        </script>
-        <!-- <select id="country" name="Org Type">
-            <option value="production">Production</option>
-            <option value="sandbox">Sandbox</option>
-        </select>
-        <a href="{{actionUrl}}" class="linkButton">Login With Salesforce</a> -->
-        {{token}}
-    </body>
+        });
+    </script>-->
+</body>
+
 </html>

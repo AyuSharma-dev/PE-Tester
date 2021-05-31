@@ -1,4 +1,3 @@
-
 .linkButton {
     font: bold 11px Arial;
     text-decoration: none;
@@ -9,7 +8,7 @@
     border-right: 1px solid #333333;
     border-bottom: 1px solid #333333;
     border-left: 1px solid #CCCCCC;
-  }
+}
 
 #customers {
     font-family: Arial, Helvetica, sans-serif;
@@ -18,13 +17,19 @@
     margin-bottom: 5%;
 }
 
-#customers td, #customers th {
+#customers td,
+#customers th {
     border: 1px solid #ddd;
     padding: 8px;
 }
 
-#customers tr:nth-child(even){background-color: #f2f2f2;}
-#customers tr:nth-child(odd){background-color: #ddd;}
+#customers tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+#customers tr:nth-child(odd) {
+    background-color: #ddd;
+}
 
 
 #customers th {
@@ -35,19 +40,33 @@
     color: white;
 }
 
-.bg{
-    background-image:url('/static/Images/bg3_low.jpg');    
+#showMore{
+    display: none;
+    margin-top: 0.5%;
+    color: white;
+    margin-left: 2%;
+}
+
+#errorDetails{
+    display: none;
+    margin-top: 0.5%;
+    color: white;
+    margin-left: 2%;
+}
+
+.bg {
+    background-image: url('/static/Images/bg3_low.jpg');
     text-align: center;
     height: 560px;
     background-size: cover;
 }
 
-.org_types{
+.org_types {
     background-color: #d5d5e5;
     border: 2px solid #070707;
 }
 
-.bottomTitle{
+.bottomTitle {
     background-color: #02315b;
     font-size: 300%;
     margin-top: 1%;
@@ -56,7 +75,8 @@
     -webkit-text-stroke: 1px black;
 }
 
-input[type=text], select {
+input[type=text],
+select {
     width: 40%;
     padding: 12px 20px;
     margin: 8px 0;
@@ -83,15 +103,51 @@ input[type=submit]:hover {
     background-color: #1571c1;
 }
 
-.message_holder{
+.message_holder {
     color: #ffffff;
     font-size: 250%;
     margin-left: 2%;
 }
 
-body{
+body {
     width: 100%;
     margin-left: 0px;
     background-color: #02315b;
     margin-top: 0px;
+}
+
+.loader {
+    position: absolute;
+    left: 45%;
+    margin-top: 3%;
+    z-index: 1000;
+    border: 16px solid #f3f3f3;
+    /* Light grey */
+    border-top: 16px solid #3498db;
+    /* Blue */
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    animation: spin 2s linear infinite;
+    -webkit-animation: spin 2s linear infinite;
+}
+
+@-webkit-keyframes spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+    }
+
+    100% {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
