@@ -1,38 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="height: 190%;">
 <head>
   <title>PE Information</title>
   <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"> 
 </head>
 <body>
+  {% with org_name=org_name %}
+    {% include 'navbar.html' %}
+  {% endwith %}
+  <div class="bg" >
+    <br/>
+    <br/>
 
-  <h3 style='color: #ccc;font-size: 30px;'>No message yet..</h3>
-  
-  <div class="message_holder"></div>
+    <form action="" method="POST" style="margin-top: 6em;">
+      <input type="text" class="evtname org_types" placeholder="Event API Name" value="Notification__c"/>
+      <br/>
+      <input type="submit"/>
+    </form>
+    <br/><br/>
+  </div>
+  <br/><br/>
+  <div class="message_holder"></div><br/><br/>
+  <table class="event_data" id="customers">
 
-  <form action="" method="POST">
-    <input type="text" class="username" placeholder="User Name"/>
-    <input type="text" class="message" placeholder="Messages"/>
-    <input type="submit"/>
-  </form>
+  </table>
 
   <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/style.css') }}">
+
   <script type="text/javascript">
     var socket = io.connect('http://' + document.domain + ':' + location.port, {secure: false});
-
+    var headersDone = false;
     socket.on( 'connect', function() {
-      socket.emit( 'my event', {
-        data: 'User Connected'
-      } )
       var form = $( 'form' ).on( 'submit', function( e ) {
         e.preventDefault()
-        let user_name = $( 'input.username' ).val()
-        let user_input = $( 'input.message' ).val()
+        let eventName = $( 'input.evtname' ).val()
         socket.emit( 'my event', {
-          user_name : user_name,
-          message : user_input
+          evtname : eventName
         } )
         $( 'input.message' ).val( '' ).focus()
       } )
@@ -40,10 +46,27 @@
     socket.on( 'my response', function( msg ) {
       console.log( 'msg-->'+JSON.stringify(msg) );
       if( msg.data != undefined && msg.data.message != undefined ){
-        $( 'div.message_holder' ).append( '<div><b style="color: #000">'+msg.data.message+'</b></div>' )
+        window.scrollTo(0, 2000);
+        $( 'div.message_holder' ).append( 'Listening to Platform Events...' )
       }
-      else{
-        $( 'div.message_holder' ).append( '<div><b style="color: #000">'+msg.data.Message__c+'</b></div>' )
+      else if( msg.data != undefined ){
+        var tableData = '';
+        if( !headersDone ){
+            window.scrollTo(0, 10000);
+            tableData += '<tr>';
+            for( var key in msg.data ){
+                tableData += '<th>'+key+'</th>'
+            }
+            headersDone = true;
+            tableData+= '</tr>';
+        }
+        tableData += '<tr>';
+        for( var key in msg.data ){ 
+            tableData += '<td>'+msg.data[key]+'</td>'
+        }
+        tableData+= '</tr>';    
+
+        $( 'table.event_data' ).append( tableData )
       }
     })
   </script>

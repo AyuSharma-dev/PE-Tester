@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #02315b;
+  height: 50px;
+  font-size: 125%;
+  font-family: sans-serif;
+}
+
+li {
+  float: right;
+}
+
+li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+li a:hover {
+  background-color: #1571c1;
+}
+
+.aText {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-style: oblique;
+}
+
+.aText:hover {
+    background-color: #1571c1;
+}
+</style>
+</head>
+<body>
+
+<ul>
+  <li><a href="https://ayu-portfolio.herokuapp.com/" target="_blank">About Me</a></li>
+  <li><a class="active" href="#home">Home</a></li>
+  {% if org_name is not none %}
+    <li style=><a href="/">Use Different Org</a></li>
+    <li style="float:left"><div class='aText' >Logged in as: <b style="color: burlywood;">{{org_name}}</b></div></li>
+  {% endif %}
+</ul>
+
+</body>
+</html>
