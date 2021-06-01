@@ -5,7 +5,7 @@ This tool helps testing the Salesforce Platform Events by subscribing to them an
 
 # How To Use
 
-&#10157;Go to the tool that is hosted [here](petester.herokuapp.com).<br/>
+&#10157;Go to the tool that is hosted [here](https://pe-tester.herokuapp.com).<br/>
 &#10157; Select your Org Type Production or Sandbox and click on Submit.<br/>
 &#10157; Enter your credentials ( This is Salesforce native page we are not storing your credentials ).<br/>
 &#10157; Now on the next screen you can see a text box, enter Platform Event API name here that you want to test.<br/>

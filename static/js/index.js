@@ -1,3 +1,5 @@
+document.body.style.zoom = 1.0;
+
 var form = $('form').on('submit', function (e) {
     e.preventDefault();
     console.log('submitted');

@@ -2,6 +2,7 @@ var socket = io.connect('http://' + document.domain + ':' + location.port, {
     secure: false
 });
 var headersDone = false;
+document.body.style.zoom = 1.0;
 
 function showMore() {
 
