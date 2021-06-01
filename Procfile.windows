@@ -1,1 +1,1 @@
-web: gunicorn -k flask_sockets.worker main:app
+gunicorn -w 1 -k eventlet -b 127.0.0.1:5000

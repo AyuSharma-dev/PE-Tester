@@ -1,5 +1,5 @@
 var socket = io.connect('https://' + document.domain + ':' + location.port, {
-    secure: false, transport:'polling'
+    secure: false
 });
 var headersDone = false;
 document.body.style.zoom = 1.0;
