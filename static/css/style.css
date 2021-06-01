@@ -75,16 +75,32 @@
     -webkit-text-stroke: 1px black;
 }
 
+h4{
+    font-size: 240%;
+    text-align: center;
+    -webkit-text-stroke: .1px white;
+    color: #02315b;
+    margin-bottom: 1%;
+}
+
+form{
+    margin-top: 6em;
+    background-color: #ffffff73;
+    padding-top: 1px;
+    padding-bottom: 47px;
+}
+
 input[type=text],
 select {
     width: 40%;
     padding: 12px 20px;
     margin: 8px 0;
     display: inline-block;
-    border: 1px solid #ccc;
+    border: 1px solid #000;
     border-radius: 4px;
     box-sizing: border-box;
-    font-size: 100%;
+    font-family: system-ui;
+    font-size: 110%;
 }
 
 input[type=submit] {

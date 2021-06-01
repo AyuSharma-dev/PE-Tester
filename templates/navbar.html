@@ -2,60 +2,51 @@
 <html>
 
 <head>
-  <style>
-    ul {
-      list-style-type: none;
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      background-color: #02315b;
-      height: 50px;
-      font-size: 125%;
-      font-family: sans-serif;
-    }
-
-    li {
-      float: right;
-    }
-
-    li a {
-      display: block;
-      color: white;
-      text-align: center;
-      padding: 14px 16px;
-      text-decoration: none;
-    }
-
-    li a:hover {
-      background-color: #1571c1;
-    }
-
-    .aText {
-      display: block;
-      color: white;
-      text-align: center;
-      padding: 14px 16px;
-      text-decoration: none;
-      font-style: oblique;
-    }
-
-    .aText:hover {
-      background-color: #1571c1;
-    }
-  </style>
+  <link href="{{ url_for('static', filename='css/navbar.css') }}" rel='stylesheet' type='text/css' />
 </head>
 
 <body>
-
+  <div id="Popup-Container"></div>
   <ul>
-    <li><a href="https://ayu-portfolio.herokuapp.com/" target="_blank">About Creator</a></li>
+    <li><a href="https://ayu-portfolio.herokuapp.com/" style="font-weight: bolder;" target="_blank">About Creator</a></li>
     {% if org_name is not none %}
-    <li style=><a href="/">Use Different Org</a></li>
+    <li><a style="font-weight: bolder;" href="/logout">Use Different Org</a></li>
     <li style="float:left">
       <div class='aText'>Logged in as: <b style="color: burlywood;">{{org_name}}</b></div>
     </li>
+    {% else %}
+    <li style=><button id="myBtn">How To Use</button></li>
     {% endif %}
   </ul>
+
+  <!-- The Modal -->
+  <div id="myModal" class="modal">
+
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <div class="modalTitle">Follow Below Steps To Use</div>
+      <div class="points">
+        <p id="tip1">&#10157; This tool is very easy to use, you can figure out yourself.</p>
+        <p id="tip2" style="display:none">&#10157; So you really want to follow easy step by step guidance :).</p>
+        <div id="tip3" style="display:none">
+          <p>&#10157; Select your Org Type Production or Sandbox and click on Submit.</p>
+          <p>&#10157; Enter your credentials ( This is Salesforce native page we are not storing your credentials. ).
+          </p>
+          <p>&#10157; Now on the next screen you can see a text box, enter Platform Event API name here that you want to
+            test.</p>
+          <p>&#10157; If everything goes well you can see message: "Listening to your Platform Events...".</p>
+          <p>&#10157; Now Publish events from Salesforce or anywhere else, you can see the Published data in Tabular
+            form.</p>
+          <p>&#10157; If anything goes wrong feel free to raise an issue on repository, no tool is perfect :)</p>
+        </div>
+      </div>
+
+      <button id="ib" class="invisibleButton">Okay if you really want to know click here</button>
+    </div>
+
+  </div>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/navbar.js') }}"></script>
 
 </body>
 

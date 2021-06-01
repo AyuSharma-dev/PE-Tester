@@ -1,0 +1,125 @@
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #02315b;
+    height: 50px;
+    font-size: 125%;
+    font-family: sans-serif;
+}
+
+li {
+    float: right;
+}
+
+li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+li a:hover {
+    background-color: #1571c1;
+}
+
+.aText {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.aText:hover {
+    background-color: #1571c1;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* The Modal (background) */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    padding-top: 100px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* Modal Content */
+.modal-content {
+    height: 25em;
+    background-color: #fefefe;
+    margin: auto;
+    border: 1px solid #888;
+    width: 80%;
+}
+
+/* The Close Button */
+.close {
+    color: #aaaaaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#myBtn {
+    background-color: #02315b;
+    border: none;
+    cursor: pointer;
+    font-size: 100%;
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+#myBtn:hover {
+    background-color: #1571c1;
+}
+
+.modalTitle {
+    background-color: #02315b;
+    height: 1.5em;
+    width: 100%;
+    color: white;
+    text-align: center;
+    font-size: 222%;
+}
+
+.points p {
+    margin-left: 2%;
+    font-size: 130%;
+    padding: 4px;
+}
+
+.invisibleButton {
+    border: none;
+    font-size: 10px;
+    float: right;
+    height: 6%;
+    width: 24%;
+    background-color: white;
+    color: black;
+    margin-top: 20%;
+}

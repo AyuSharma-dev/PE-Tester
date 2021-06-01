@@ -11,20 +11,24 @@ import utility.constants as cons
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24) #Generating the secret key
-socketio = SocketIO(app, engineio_logger=True, logger=True, cors_allowed_origins=cons.DOMAIN, async_mode="threading")
+socketio = SocketIO(app, cors_allowed_origins=cons.DOMAIN, async_mode="threading") #Initiating SocketIo
 
 
 @app.route('/', methods=['POST', 'GET'])
 def home():
     authUrl = 'client_id='+cons.CLIENT_ID
     authUrl += '&redirect_uri='+cons.REDIRECT_URL
-    authUrl += '&response_type='+cons.RESPONSE_TYPE#+'&prompt=login'
-    authUrlProd = cons.PROD_URL+authUrl
-    authUrlSand = cons.SANDBOX_URL+authUrl
+    authUrl += '&response_type='+cons.RESPONSE_TYPE
+    if( info.promptLogin ):
+        authUrl += '&prompt=login'
+        info.promptLogin = False
+    authUrlProd = cons.PROD_URL+authUrl #Oauth2.0 url for Production
+    authUrlSand = cons.SANDBOX_URL+authUrl #Oauth2.0 url for Sandbox
     print(authUrl)
-    return render_template("index.html", token='', actionUrlProd=authUrlProd, actionUrlSand=authUrlSand)
+    return render_template("index.html", token='', actionUrlProd=authUrlProd, actionUrlSand=authUrlSand) #Calling Home Page
 
 
+#Method calls when the Salesforce Oauth redirects with Code.
 @app.route('/oauth2/callback', methods=['POST', 'GET'])
 def oauthCallback():
     global domain
@@ -37,9 +41,10 @@ def oauthCallback():
     else:
         return render_template( 'error.html' )
     
-    return render_template( 'redirectingTemp.html' )
+    return render_template( 'redirectingTemp.html', urlToOpen='/subscribeToPE' )
 
 
+#Method stores the Org Domain
 @app.route('/getOrgType', methods=['POST', 'GET'])
 def getOrgType():
     global orgDomain
@@ -50,75 +55,110 @@ def getOrgType():
     return render_template( 'EventSubscription.html' )
 
 
+#Renders the EventSubscription template.
 @app.route('/subscribeToPE', methods=['POST', 'GET'])
 def getPEDetails():
     return render_template("EventSubscription.html", org_name=info.org_url )
 
 
+#Method is called from the Socket of Javascript
 @socketio.on('eventToSubscribe')
 def stream_events(eventDetails, methods=['GET', 'POST']):
     
     try:
+        info.eventName = eventDetails['evtname']
+        print( 'eventName-->'+info.eventName )
         if( info.loop is None ):
             info.loop = asyncio.new_event_loop()
-            info.loop.run_until_complete(perform_message( eventDetails['evtname'] ))
+            info.loop.run_until_complete(perform_message( info.eventName ))
         else:
-            send_fut = asyncio.run_coroutine_threadsafe( perform_message( eventDetails['evtname'] ), info.loop)
+            print('inside coroutine')
+            send_fut = asyncio.run_coroutine_threadsafe( perform_message( info.eventName ), info.loop)
     except Exception as e:
         socketio.emit('receivedEvent', {'data':{'error':str(e), 'message':'Sorry something went wrong!!'}}, callback=messageReceived)
 
 
+#Method work as a Callback value
 def messageReceived(methods=['GET', 'POST']):
     print('message was received!!!')
 
 
+#Method perfrom Auth for the Event Subscription and Subscribes to the Event
 async def perform_message( eventName ):
     global eventPath
     eventPath = "/event/"+eventName
     isSandbox = False
-    if( info.client is None ):
-        if( cons.SANDBOX_DOMAIN == orgDomain ):
-            isSandbox = True
+    print('At begining')
+    if( info.unSubEventsOnly ):
+        info.unSubEventsOnly = False
+        await info.client.unsubscribe(info.eventPath)
+        info.client = None
+        info.eventPath = None
+        print('unsubscribed')
 
-        auth = RefreshTokenAuthenticator(
-                consumer_key=cons.CLIENT_ID,
-                consumer_secret=cons.CLIENT_SECRET,
-                refresh_token=info.refresh_token,
-                sandbox=isSandbox
-            )
-
-        client = Client(auth)
-        info.client = client
-
-        await info.client.open()
-    
-    if( info.eventPath is None or (info.eventPath != eventPath) ):
-        if( info.eventPath is not None and info.eventPath != eventPath ):
-            await info.client.unsubscribe(info.eventPath)
-
-        info.eventPath = eventPath
-        await info.client.subscribe(eventPath)
-
-        socketio.emit('receivedEvent', {'data':{'message':'Listening To PE Events'}}, callback=messageReceived)
-        
-        # listen for incoming messages
-        async for message in info.client:
-            topic = message["channel"]
-            data = message["data"]
-            payload = message["data"]["payload"]
-            print(f"Payload is: {payload}")
-            socketio.emit('receivedEvent', {'data':payload}, callback=messageReceived)
     else:
-        socketio.emit('receivedEvent', {'data':{'message':'Listening to Platform Events...'}}, callback=messageReceived)
+        print('In correct else')
+        if( info.client is None ):
+            print('Getting Client')
+            if( cons.SANDBOX_DOMAIN == orgDomain ):
+                isSandbox = True
+
+            auth = RefreshTokenAuthenticator(
+                    consumer_key=cons.CLIENT_ID,
+                    consumer_secret=cons.CLIENT_SECRET,
+                    refresh_token=info.refresh_token,
+                    sandbox=isSandbox
+                )
+
+            client = Client(auth) #Authorizing the client with Refresh Token.
+            info.client = client
+
+            await info.client.open()
+            if( info.eventPath is not None and info.eventPath != eventPath ):
+                await info.client.unsubscribe(info.eventPath)
+        
+        if( info.eventPath is None or (info.eventPath != eventPath) ):
+            
+            if( info.eventPath is not None and info.eventPath != eventPath ):
+                await info.client.unsubscribe(info.eventPath)
+
+            info.eventPath = eventPath
+            await info.client.subscribe(eventPath) #Subscribing to Event
+
+            socketio.emit('receivedEvent', {'data':{'message':'Listening to Platform Events...'}}, callback=messageReceived)
+            
+            # listen for incoming messages
+            async for message in info.client:
+                print('looking for messages')
+                topic = message["channel"]
+                data = message["data"]
+                payload = message["data"]["payload"]
+                print(f"Payload is: {payload}")
+                socketio.emit('receivedEvent', {'data':payload}, callback=messageReceived) #Once the PE published from SF send it to JS
+        else:
+            print('inside else')
+            socketio.emit('receivedEvent', {'data':{'message':'Listening to Platform Events...'}}, callback=messageReceived)
 
 
-def logOutAndUnsubscribe( refresh=True ):
-    if info.eventPath != "":
-        info.client.unsubscribe(info.eventPath)
-    if( refresh ):
-        home()
+#Method logs out user
+@app.route('/logout', methods=['POST', 'GET'])
+def logOutAndUnsubscribe():
+    info.unSubEventsOnly = True
+    info.promptLogin = True
+    send_fut = asyncio.run_coroutine_threadsafe( perform_message( info.eventName ), info.loop)
+    #stream_events( {'evtname': info.eventName} )
+        # asyncio.set_event_loop(loop)
+        # send_fut2 = asyncio.get_event_loop()
+        # send_fut2.run_until_complete( unsubscribe() )
+    #     send_fut.result()
+    return render_template( 'redirectingTemp.html', urlToOpen='/' )
 
 
+async def unsubscribe():
+    if( info.client is not None ):
+        await info.client.unsubscribe(info.eventPath)
+
+#Method gets the Access Token with the value of Code returned by OAuth
 def getAccessToke( code ):
     authURL = 'https://'+orgDomain+'/services/oauth2/token?'
     authURL += 'grant_type=authorization_code&'
@@ -131,12 +171,16 @@ def getAccessToke( code ):
     return reqResult
 
 
+#Class stores basic information
 class info:
     eventPath = None
     client = None
     loop = None
     org_url = None
     refresh_token = None
+    promptLogin = False
+    eventName = None
+    unSubEventsOnly = False
 
 ##Running the app
 if __name__ == '__main__':
