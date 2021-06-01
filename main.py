@@ -11,7 +11,7 @@ import utility.constants as cons
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24) #Generating the secret key
-socketio = SocketIO(app, cors_allowed_origins=cons.DOMAIN, async_mode="threading") #Initiating SocketIo
+socketio = SocketIO(app, logger=True, engineio_logger=True, cors_allowed_origins=cons.DOMAIN, async_mode="threading") #Initiating SocketIo
 
 
 @app.route('/', methods=['POST', 'GET'])
