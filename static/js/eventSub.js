@@ -1,5 +1,5 @@
-var socket = io.connect('https://' + document.domain + ':' + location.port, {
-    transports: ['websocket']
+var socket = io.connect('http://' + document.domain + ':' + location.port, {
+    secure: false
 });
 var headersDone = false;
 document.body.style.zoom = 1.0;
@@ -35,18 +35,19 @@ socket.on('receivedEvent', function (msg) {
     document.getElementById('eventText').disabled = false;
     document.getElementById('submitBtn').disabled = false;
 
-    if (msg.data != undefined) {
-        if (msg.data.error !== undefined) {
+    if( msg.data != undefined ){
+        if( msg.data.error !== undefined ){
             $('div.message_holder').append(msg.data.message)
             document.getElementById('showMore').style.display = 'block';
             document.getElementById('message_holder').style.fontSize = '200%';
             document.getElementById('errorDetails').innerHTML = msg.data.error;
-        } else if (msg.data.message !== undefined) {
+        }
+        else if (msg.data.message !== undefined) {
             document.getElementById('eventSubHtml').style.height = '190%';
             window.scrollTo(0, 2000);
             document.getElementById('message_holder').style.fontSize = '250%';
             $('div.message_holder').append(msg.data.message)
-        } else {
+        } else{
             var tableData = '';
             if (!headersDone) {
                 window.scrollTo(0, 10000);
@@ -62,7 +63,7 @@ socket.on('receivedEvent', function (msg) {
                 tableData += '<td>' + msg.data[key] + '</td>'
             }
             tableData += '</tr>';
-
+    
             $('table.event_data').append(tableData)
         }
     }
