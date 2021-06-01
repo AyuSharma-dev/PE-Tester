@@ -1,6 +1,6 @@
-var socket = io.connect('https://' + document.domain + ':' + location.port, {
-    secure: false
-});
+var socket = io.connect('http://pe-tester.herokuapp.com/', 
+    {transports: ['websocket']}
+);
 var headersDone = false;
 document.body.style.zoom = 1.0;
 
