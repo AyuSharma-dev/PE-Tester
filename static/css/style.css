@@ -57,7 +57,7 @@
 .bg {
     background-image: url('/static/Images/bg3_low2.jpg');
     text-align: center;
-    height: 560px;
+    height: 800px;
     background-size: cover;
 }
 
@@ -72,12 +72,11 @@
 }
 
 .bottomTitle {
-    background-color: #02315b;
-    font-size: 300%;
+    background-color: #ffffff91;
+    font-size: 400%;
     margin-top: 1%;
     text-align: center;
-    color: navajowhite;
-    -webkit-text-stroke: 1px black;
+    color: #02315b;
 }
 
 h4{

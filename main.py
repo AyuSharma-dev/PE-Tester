@@ -113,8 +113,9 @@ async def perform_message( eventName, channelType ):
 
             client = Client(auth) #Authorizing the client with Refresh Token.
             info.client = client
-
+            print('OPening client')
             await info.client.open()
+            print('Client Opened')
             if( info.eventPath is not None and info.eventPath != eventPath ):
                 await info.client.unsubscribe(info.eventPath)
         
