@@ -1,4 +1,4 @@
-var socket = io.connect('https://4492-122-177-159-16.ngrok.io/');
+var socket = io.connect('https://pe-tester.herokuapp.com/');
 
 var headersDone = false;
 document.body.style.zoom = 1.0;
