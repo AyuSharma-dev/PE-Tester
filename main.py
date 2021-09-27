@@ -64,16 +64,17 @@ def getPEDetails():
 #Method is called from the Socket of Javascript
 @socketio.on('eventToSubscribe')
 def stream_events(eventDetails, methods=['GET', 'POST']):
-    
+    print( eventDetails )
     try:
         info.eventName = eventDetails['evtname']
-        print( 'eventName-->'+info.eventName )
+        info.channelType = eventDetails['channeltype'];
+        print( 'eventName-->'+info.eventName+'---'+info.channelType )
         if( info.loop is None ):
             info.loop = asyncio.new_event_loop()
-            info.loop.run_until_complete(perform_message( info.eventName ))
+            info.loop.run_until_complete(perform_message( info.eventName, info.channelType ))
         else:
             print('inside coroutine')
-            send_fut = asyncio.run_coroutine_threadsafe( perform_message( info.eventName ), info.loop)
+            send_fut = asyncio.run_coroutine_threadsafe( perform_message( info.eventName, info.channelType ), info.loop)
     except Exception as e:
         socketio.emit('receivedEvent', {'data':{'error':str(e), 'message':'Sorry something went wrong!!'}}, callback=messageReceived)
 
@@ -84,9 +85,9 @@ def messageReceived(methods=['GET', 'POST']):
 
 
 #Method perfrom Auth for the Event Subscription and Subscribes to the Event
-async def perform_message( eventName ):
+async def perform_message( eventName, channelType ):
     global eventPath
-    eventPath = "/event/"+eventName
+    eventPath = "/"+channelType+"/"+eventName
     isSandbox = False
     print('At begining')
     if( info.unSubEventsOnly ):
@@ -123,6 +124,7 @@ async def perform_message( eventName ):
                 await info.client.unsubscribe(info.eventPath)
 
             info.eventPath = eventPath
+            print( info.eventPath )
             await info.client.subscribe(eventPath) #Subscribing to Event
 
             socketio.emit('receivedEvent', {'data':{'message':'Listening to Platform Events...'}}, callback=messageReceived)
@@ -130,14 +132,20 @@ async def perform_message( eventName ):
             # listen for incoming messages
             async for message in info.client:
                 print('looking for messages')
-                topic = message["channel"]
                 data = message["data"]
-                payload = message["data"]["payload"]
-                print(f"Payload is: {payload}")
-                socketio.emit('receivedEvent', {'data':payload}, callback=messageReceived) #Once the PE published from SF send it to JS
+                print(channelType)
+                print(data)
+                payload = None
+                
+                if 'payload' in data:
+                    payload = data["payload"]
+                else:
+                    payload = data['sobject']
+                socketio.emit('receivedEvent', {'data':payload}, callback=messageReceived)
+                 #Once the PE published from SF send it to JS
         else:
             print('inside else')
-            socketio.emit('receivedEvent', {'data':{'message':'Listening to Platform Events...'}}, callback=messageReceived)
+            socketio.emit('receivedEvent', {'data':{'message':'Listening to Streaming channel'}}, callback=messageReceived)
 
 
 #Method logs out user
@@ -174,6 +182,7 @@ def getAccessToke( code ):
 #Class stores basic information
 class info:
     eventPath = None
+    channelType = None
     client = None
     loop = None
     org_url = None

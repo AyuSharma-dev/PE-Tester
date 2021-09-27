@@ -1,4 +1,4 @@
-var socket = io.connect('http://pe-tester.herokuapp.com/');
+var socket = io.connect('https://4030-122-177-159-16.ngrok.io/');
 
 var headersDone = false;
 document.body.style.zoom = 1.0;
@@ -22,8 +22,11 @@ socket.on('connect', function () {
         document.getElementById('message_holder').innerHTML = '';
 
         let eventName = $('input.evtname').val()
+        let channelType = $('#channelType :selected').val()
+        console.log('channelType==>'+channelType);
         socket.emit('eventToSubscribe', {
-            evtname: eventName
+            evtname: eventName,
+            channeltype: channelType
         })
         $('input.message').val('').focus()
     })

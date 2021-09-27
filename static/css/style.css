@@ -66,6 +66,11 @@
     border: 2px solid #070707;
 }
 
+#channelType{
+    background-color: #d5d5e5;
+    border: 2px solid #070707;
+}
+
 .bottomTitle {
     background-color: #02315b;
     font-size: 300%;
