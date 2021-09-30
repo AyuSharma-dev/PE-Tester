@@ -154,7 +154,7 @@ async def perform_message( eventName, channelType ):
 def logOutAndUnsubscribe():
     info.unSubEventsOnly = True
     info.promptLogin = True
-    send_fut = asyncio.run_coroutine_threadsafe( perform_message( info.eventName ), info.loop)
+    send_fut = asyncio.run_coroutine_threadsafe( perform_message( info.eventName, info.channelType ), info.loop)
     #stream_events( {'evtname': info.eventName} )
         # asyncio.set_event_loop(loop)
         # send_fut2 = asyncio.get_event_loop()
