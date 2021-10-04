@@ -5,12 +5,16 @@ async-timeout==3.0.1
 asyncio==3.4.3
 attrs==21.2.0
 bidict==0.21.2
+cachelib==0.3.0
 certifi==2020.12.5
+cffi==1.14.5
 chardet==4.0.0
 click==8.0.1
+colorama==0.4.4
 dnspython==1.16.0
 eventlet==0.30.1
 Flask==2.0.1
+Flask-Session==0.4.0
 Flask-SocketIO==4.3.1
 Flask-Sockets==0.2.1
 gevent==21.1.2
@@ -22,6 +26,7 @@ itsdangerous==2.0.1
 Jinja2==3.0.1
 MarkupSafe==2.0.1
 multidict==5.1.0
+pycparser==2.20
 python-engineio==3.13.2
 python-socketio==4.6.0
 requests==2.25.1

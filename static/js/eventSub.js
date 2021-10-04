@@ -2,7 +2,7 @@ var socket = io.connect('https://pe-tester.herokuapp.com/');
 
 var headersDone = false;
 document.body.style.zoom = 1.0;
-
+var clientKey;
 function showMore() {
 
     document.getElementById('showMore').style.display = 'none';
@@ -23,10 +23,13 @@ socket.on('connect', function () {
 
         let eventName = $('input.evtname').val()
         let channelType = $('#channelType :selected').val()
-        console.log('channelType==>'+channelType);
+        if( clientKey == undefined ){
+            clientKey = (Math.random() + 1).toString(36).substring(2);
+        }
         socket.emit('eventToSubscribe', {
             evtname: eventName,
-            channeltype: channelType
+            channeltype: channelType,
+            clientKey: clientKey
         })
         $('input.message').val('').focus()
     })
@@ -37,7 +40,7 @@ socket.on('receivedEvent', function (msg) {
     document.getElementById('eventText').disabled = false;
     document.getElementById('submitBtn').disabled = false;
 
-    if( msg.data != undefined ){
+    if( msg.data != undefined && msg.data.clientKey == clientKey ){
         if( msg.data.error !== undefined ){
             $('div.message_holder').append(msg.data.message)
             document.getElementById('showMore').style.display = 'block';
@@ -54,15 +57,15 @@ socket.on('receivedEvent', function (msg) {
             if (!headersDone) {
                 window.scrollTo(0, 10000);
                 tableData += '<tr>';
-                for (var key in msg.data) {
+                for (var key in msg.data.payload) {
                     tableData += '<th>' + key + '</th>'
                 }
                 headersDone = true;
                 tableData += '</tr>';
             }
             tableData += '<tr>';
-            for (var key in msg.data) {
-                tableData += '<td>' + msg.data[key] + '</td>'
+            for (var key in msg.data.payload) {
+                tableData += '<td>' + msg.data.payload[key] + '</td>'
             }
             tableData += '</tr>';
     
