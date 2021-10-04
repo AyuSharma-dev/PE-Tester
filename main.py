@@ -8,7 +8,7 @@ from json import loads
 import requests
 from urllib.parse import urlparse
 import utility.constants as cons
-
+import nest_asyncio
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24) #Generating the secret key
@@ -16,6 +16,7 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 app.config.from_object(__name__)
 Session(app)
+nest_asyncio.apply()
 
 socketio = SocketIO(app, logger=True, engineio_logger=True, async_mode="threading") #Initiating SocketIo
 socketio.init_app(app, cors_allowed_origins="*")
