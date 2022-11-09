@@ -1,25 +1,29 @@
 import asyncio
 from aiosfstream import SalesforceStreamingClient, RefreshTokenAuthenticator, Client
 from flask_socketio import SocketIO, emit
+from flask.json import jsonify
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_session import Session
 import os, sys; sys.path.append(os.path.dirname(os.path.realpath(__file__)))    #Generate toekn
-from json import loads
+from json import loads, dumps
 import requests
 from urllib.parse import urlparse
 import utility.constants as cons
 import nest_asyncio
 
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24) #Generating the secret key
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
+app.config.update(SESSION_COOKIE_SAMESITE="None", SESSION_COOKIE_SECURE=True)
 app.config.from_object(__name__)
 Session(app)
 nest_asyncio.apply()
+cache = {}
 
-socketio = SocketIO(app, logger=True, engineio_logger=True, async_mode="threading") #Initiating SocketIo
-socketio.init_app(app, cors_allowed_origins="*")
+# socketio = SocketIO(app, logger=True, engineio_logger=True, async_mode="threading") #Initiating SocketIo
+# socketio.init_app(app, cors_allowed_origins="*")
 
 @app.route('/', methods=['POST', 'GET'])
 def home():
@@ -38,7 +42,6 @@ def home():
 @app.route('/oauth2/callback', methods=['POST', 'GET'])
 def oauthCallback():
     # global domain
-    # domain = urlparse(request.url_root).netloc
     session['authDetails'] = getAccessToke( request.args.get('code') )
     if( session.get('authDetails') != None ):
         session['refresh_token'] = session.get('authDetails').get('refresh_token')
@@ -60,35 +63,40 @@ def getOrgType():
     return render_template( 'EventSubscription.html' )
 
 
+@app.route('/getReceivedDetails', methods=['POST', 'GET'])
+def getReceivedDetails():
+    clientKey = request.args.get('clientKey')
+    return dumps(cache[clientKey])
+
+
 #Renders the EventSubscription template.
 @app.route('/subscribeToPE', methods=['POST', 'GET'])
 def getPEDetails():
     return render_template("EventSubscription.html", org_name=session.get('org_url') )
 
 
-#Method is called from the Socket of Javascript
-@socketio.on('eventToSubscribe')
-def stream_events(eventDetails, methods=['GET', 'POST']):
+@app.route('/eventDetails', methods=['POST'])
+def handleEventDetails():
+    return stream_events2( request.json['eventName'], request.json['eventType'], request.json['clientKey'] )
+
+def stream_events2( eventName, eventType, clientKey ):
     try:
-        session['eventName'] = eventDetails['evtname']
-        session['channelType'] = eventDetails['channeltype']
-        session['clientKey'] = eventDetails['clientKey']
+        session['eventName'] = eventName
+        session['channelType'] = eventType
+        session['clientKey'] = clientKey
         if( session.get('loop') is None ):
+            cache[clientKey] = []
             session['loop'] = asyncio.new_event_loop()
-            session['loop'].run_until_complete(perform_message( session.get('eventName'), session.get('channelType') ))
+            session['loop'].run_until_complete(perform_message( session.get('eventName'), session.get('channelType'), session.get('clientKey') ))
         else:
             send_fut = asyncio.run_coroutine_threadsafe( perform_message( session.get('eventName'), session.get('channelType') ), session.get('loop'))
+        return dumps({'success':True, 'clientKey':session['clientKey']}), 200, {'ContentType':'application/json'} 
     except Exception as e:
-        socketio.emit('receivedEvent', {'data':{'error':str(e), 'message':'Sorry something went wrong!!', 'clientKey':session['clientKey']}}, callback=messageReceived)
-
-
-#Method work as a Callback value
-def messageReceived(methods=['GET', 'POST']):
-    print('message was received!!!')
+        return dumps({'success':False, 'clientKey':session['clientKey'], 'message': 'Sorry something went wrong!!'}), 400, {'ContentType':'application/json'} 
 
 
 #Method perfrom Auth for the Event Subscription and Subscribes to the Event
-async def perform_message( eventName, channelType ):
+async def perform_message( eventName, channelType, clientKey ):
     listeningTo = ( 'Push Topics' if channelType == 'topic' else 'Platform Events' )
     eventPath = "/"+channelType+"/"+eventName
     isSandbox = False
@@ -101,6 +109,7 @@ async def perform_message( eventName, channelType ):
     else:
         session['unSubEventsOnly'] = False
         if( session.get('client') is None ):
+
             auth = RefreshTokenAuthenticator(
                     consumer_key=cons.CLIENT_ID,
                     consumer_secret=cons.CLIENT_SECRET,
@@ -123,8 +132,6 @@ async def perform_message( eventName, channelType ):
             session['eventPath'] = eventPath
             await session.get('client').subscribe(eventPath) #Subscribing to Event
 
-            socketio.emit('receivedEvent', {'data':{'message':'Listening to '+listeningTo+'...', 'clientKey':session['clientKey']}}, callback=messageReceived)
-            
             # listen for incoming messages
             async for message in session.get('client'):
                 data = message["data"]
@@ -132,12 +139,12 @@ async def perform_message( eventName, channelType ):
                 
                 if 'payload' in data:
                     payload = data["payload"]
+                    cache[clientKey].append(payload) 
                 else:
                     payload = data['sobject']
-                socketio.emit('receivedEvent', {'data':{'payload':payload, 'clientKey':session['clientKey']}}, callback=messageReceived)
-                 #Once the PE published from SF send it to JS
+                    cache[clientKey].append(payload) 
         else:
-            socketio.emit('receivedEvent', {'data':{'message':'Listening to '+listeningTo+'...', 'clientKey':session['clientKey']}}, callback=messageReceived)
+            print('inside else')
 
 
 #Method logs out user
@@ -169,4 +176,6 @@ def getAccessToke( code ):
 
 ##Running the app
 if __name__ == '__main__':
-    socketio.run(app)
+    app.run(debug=True)
+    
+    # socketio.run(app)

@@ -171,3 +171,15 @@ body {
         transform: rotate(360deg);
     }
 }
+
+#refreshButton{
+    display: none;
+    font-size: 25px;
+    background: #02315b;
+    border: 1px solid white;
+    border-radius: 7px;
+    color: antiquewhite;
+    cursor: pointer;
+    vertical-align: middle;
+    margin-left: 20px;
+}
