@@ -1,0 +1,33 @@
+<!DOCTYPE HTML>
+<html style="max-height: 100%;">
+
+<head>
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel='stylesheet' type='text/css' />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+</head>
+
+<body>
+    {% with org_name=none %}
+    {% include 'navbar.html' %}
+    {% endwith %}
+
+    <div class="bg">
+        <br />
+        <h1 class="bottomTitle">Salesforce Platform Events Tester</h1><br/>
+        <form action="" method="POST" style="margin-top: 8em;">
+            <h4>Select Your Org Type</h4>
+            <select class="org_types" name="OrgType">
+                <option value="production">Production</option>
+                <option value="sandbox">Sandbox</option>
+            </select><br />
+            <input type="submit" />
+        </form>
+        <a href="{{actionUrlProd}}" id="linkProd" style='Display:None'></a>
+        <a href="{{actionUrlSand}}" id="linkSand" style='Display:None'></a>
+    </div>
+    {{token}}
+    <script type="text/javascript" src="{{ url_for('static', filename='js/index.js') }}"></script>
+</body>
+
+</html>
