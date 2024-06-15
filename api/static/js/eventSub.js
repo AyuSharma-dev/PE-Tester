@@ -46,7 +46,7 @@ var form = $('form').on('submit', function (e) {
             document.getElementById('message_holder').style.fontSize = '200%';
             document.getElementById('refreshButton').style.display = 'none';
             document.getElementById('buttonHelpText').style.display = 'none';
-            document.getElementById('errorDetails').innerHTML = textStatus+'-'+'Please check Name of your Event Object and make sure your User has access for this.';
+            document.getElementById('errorDetails').innerHTML = textStatus+'-'+'Please subscribe to event again.';
         }
     });
 
@@ -74,6 +74,13 @@ function afterProcess(){
 
 
 function getReceivedEvents(){
+
+    document.getElementById("refreshButton").disabled = true;
+    document.getElementById("refreshButton").style.background = '#a4b7c8';
+    setTimeout(function(){
+        document.getElementById("refreshButton").disabled = false;
+        document.getElementById("refreshButton").style.background = '#02315b';
+    },3000);
 
     $.ajax({
         type: "GET",
